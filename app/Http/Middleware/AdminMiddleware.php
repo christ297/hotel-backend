@@ -18,7 +18,7 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         // Vérifier si l'utilisateur est authentifié et s'il est admin
-        if (!Auth::check() || !Auth::user()->is_admin) {
+        if (!Auth::check() && !Auth::user()->is_admin) {
             return response()->json(['message' => 'Accès interdit, vous n\'êtes pas administrateur.'], 403);
         }
 

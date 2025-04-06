@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny', User::class);  // Assurez-vous que l'utilisateur est autorisé à voir tous les utilisateurs
+       // $this->authorize('viewAny', User::class);  // Assurez-vous que l'utilisateur est autorisé à voir tous les utilisateurs
         return response()->json(User::all(), 200);
     }
 
@@ -65,6 +65,7 @@ class UserController extends Controller
     return response()->json([
         'message' => 'Connexion réussie',
         'token' => $token,
+        'is_admin'=>$user->is_admin,
     ], 200);
 }
 
@@ -81,9 +82,9 @@ class UserController extends Controller
         }
 
         // Vérifier si l'utilisateur connecté est celui qui demande les infos ou si c'est un administrateur
-        if (Auth::id() != $user->id && !Auth::user()->is_admin) {
+      /*  if (Auth::id() != $user->id && !Auth::user()->is_admin) {
             return response()->json(['message' => 'Accès interdit'], 403);
-        }
+        }*/
 
         return response()->json($user, 200);
     }
@@ -101,9 +102,9 @@ class UserController extends Controller
         }
 
         // Vérifier si l'utilisateur connecté est celui qui tente de modifier ses informations ou s'il est un administrateur
-        if (Auth::id() != $user->id && !Auth::user()->is_admin) {
+       /* if (Auth::id() != $user->id && !Auth::user()->is_admin) {
             return response()->json(['message' => 'Accès interdit'], 403);
-        }
+        }*/
 
         $request->validate([
             'name' => 'sometimes|string|max:255',
