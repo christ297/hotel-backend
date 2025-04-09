@@ -21,7 +21,7 @@ return new class extends Migration
             $table->date('date_depart');
             $table->integer('dure_reservation');
             $table->timestamps();
-        });
+        });        
     }
 
     /**

@@ -2,11 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\ChambreController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\UserController;
-
+    
     Route::post('/users', [UserController::class, 'store']);
     Route::post('/users/login', [UserController::class, 'login']);
 
@@ -18,7 +17,7 @@ use App\Http\Controllers\UserController;
         Route::post('/chambre', [ChambreController::class, 'store']);
         Route::put('/chambre/{id}', [ChambreController::class, 'update']);
         Route::delete('/chambre/{id}', [ChambreController::class, 'destroy']);
-
+        
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
@@ -31,6 +30,8 @@ use App\Http\Controllers\UserController;
         Route::delete('/reservation/{id}', [ReservationController::class, 'destroy']);
         Route::get('/reservation/search', [ReservationController::class, 'search']);
  //   });
+
+
 
 
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

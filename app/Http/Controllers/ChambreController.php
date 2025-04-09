@@ -44,7 +44,12 @@ class ChambreController extends Controller
             'prix_nuite' => 'required|numeric|min:0',
             'disponibilite' => 'required|boolean',
             'date' => 'required|date',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('photos', 'public');
+            $validatedData['photo'] = $photoPath;
+        }
 
         $chambre = Chambre::create($validatedData);
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->double('prix_nuite');
             $table->boolean('disponibilite')->default(true);
             $table->date('date');
+            $table->string('photo')->nullable();
             $table->timestamps();
         });
     }
