@@ -56,14 +56,11 @@ class ReservationController extends Controller
                 'dure_reservation' => $dureeReservation,
             ]);
 
-            // Récupère la chambre et l'utilisateur associés à la réservation
             $chambre = $reservation->chambre;
             $client = User::find($reservation->user_id);
 
-            // Calcul du montant total de la réservation
             $montantTotal = $chambre->prix_nuite * $dureeReservation;
 
-            // Découper le nom du client s'il contient un espace
             $nameParts = explode(' ', $client->name);
             $firstName = $nameParts[0];
             $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
@@ -78,19 +75,25 @@ class ReservationController extends Controller
                     'lastname' => $lastName,
                     'email' => $client->email,
                     'phone_number' => [
-                        'number' => $request->phone_number, // Le client doit fournir son numéro
-                        'country' => 'TG'                    // Code pays Togo
+                        'number' => $request->phone_number, 
+                        'country' => 'TG'                    
                     ]
                 ]
             ]);
 
-            // Rediriger vers l'URL de paiement générée par FedaPay
+            // URL de paiement générée par FedaPay
             $token = $transaction->generateToken();
 
+            if($token){
+                $chambre->disponibilite = 0;
+                $chambre->save();
+                }
             return response()->json([
                 'success' => true,
                 'redirect_url' => $token->url
             ]);
+
+           
 
 
         } catch (\Exception $e) {
@@ -135,6 +138,9 @@ class ReservationController extends Controller
     {
         // Supprime une réservation
         $reservation = Reservation::findOrFail($id);
+        $chambre = $reservation->chambre;
+        $chambre->disponibilite = 1;
+        $chambre->save();
         $reservation->delete();
 
         return response()->json(['message' => 'Reservation deleted successfully']);
@@ -143,19 +149,18 @@ class ReservationController extends Controller
     /**
      * Search reservations by user or date.
      */
-    public function search(Request $request)
+    public function searchReservations(Request $request)
     {
-        $query = Reservation::query();
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
 
-        if ($request->has('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-        if ($request->has('date_arrive')) {
-            $query->whereDate('date_arrive', $request->date_arrive);
-        }
-
-        $reservations = $query->get();
+        $reservations = Reservation::whereBetween('created_at', [$startDate, $endDate])
+        ->get();
 
         return response()->json($reservations);
     }

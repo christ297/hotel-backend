@@ -109,4 +109,23 @@ class ChambreController extends Controller
 
         return response()->json(['message' => 'Chambre supprimée avec succès'], 200);
     }
+
+
+
+    public function searchChambres(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $chambres = Chambre::where('disponibilite', 1)
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->get();
+
+        return response()->json($chambres);
+    }
 }
