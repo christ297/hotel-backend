@@ -5,6 +5,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChambreController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\UserController;
+
+
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\MenuItemController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BarStatsController;
     
     Route::post('/users', [UserController::class, 'store']);
     Route::post('/users/login', [UserController::class, 'login']);
@@ -32,6 +38,34 @@ use App\Http\Controllers\UserController;
     });
 
         Route::post('/search_chambres', [ChambreController::class, 'searchChambres']);
+
+
+
+
+
+
+
+
+//Route::middleware('auth:sanctum')->group(function () {
+    // Commandes
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
+    
+    // Menu
+    Route::get('/menu-items', [MenuItemController::class, 'index']);
+    Route::post('/menu-items', [MenuItemController::class, 'store']);
+    Route::put('/menu-items/{menuItem}', [MenuItemController::class, 'update']);
+    Route::delete('/menu-items/{menuItem}', [MenuItemController::class, 'destroy']);
+    
+    // Catégories
+    Route::get('/categories', [CategoryController::class, 'index']);
+    
+    // Statistiques
+    Route::get('/bar-stats', [BarStatsController::class, 'index']);
+//});
+
 
 
 
