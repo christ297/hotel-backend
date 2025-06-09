@@ -14,9 +14,11 @@ class UserController extends Controller
      * Accessible uniquement par l'administrateur.
      */
     public function index()
-    {
+    {        
+
        // $this->authorize('viewAny', User::class);  // Assurez-vous que l'utilisateur est autorisé à voir tous les utilisateurs
         return response()->json(User::all(), 200);
+
     }
 
     /**
@@ -29,12 +31,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
+            'is_admin' => 'sometimes|boolean', // Permet de définir si l'utilisateur est un administrateur
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'is_admin' => $request->is_admin ?? false, // Par défaut, l'utilisateur n'est pas un administrateur
         ]);
 
         return response()->json([
@@ -93,28 +97,54 @@ class UserController extends Controller
      * Mettre à jour un utilisateur.
      * Accessible uniquement par l'utilisateur lui-même ou l'administrateur.
      */
-    public function update(Request $request, string $id)
-    {
-        $user = User::find($id);
 
+public function update(Request $request, string $id)
+{
+    try {
+        // Check authentication
+        $authUser = Auth::user();
+        if (!$authUser) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        // Find user to update
+        $user = User::find($id);
         if (!$user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 
-        // Vérifier si l'utilisateur connecté est celui qui tente de modifier ses informations ou s'il est un administrateur
-       /* if (Auth::id() != $user->id && !Auth::user()->is_admin) {
-            return response()->json(['message' => 'Accès interdit'], 403);
-        }*/
-
-        $request->validate([
+        // Validate request data
+        $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
             'password' => 'sometimes|string|min:6',
+            'is_admin' => 'sometimes|boolean'
         ]);
 
-        if ($request->has('name')) $user->name = $request->name;
-        if ($request->has('email')) $user->email = $request->email;
-        if ($request->has('password')) $user->password = Hash::make($request->password);
+        // Update basic info
+        if ($authUser->is_admin){
+        if ($request->has('name')) {
+            $user->name = $validated['name'];
+        }
+        if ($request->has('email')) {
+            $user->email = $validated['email'];
+        }
+        if ($request->has('password')) {
+            $user->password = Hash::make($validated['password']);
+        }
+    
+        // Handle admin status change
+        if ($request->has('is_admin')) {
+            
+                
+            
+            $user->is_admin = $validated['is_admin'];
+        }
+    }else{
+        return response()->json([
+                    'message' => 'Seuls les administrateurs peuvent modifier les utilisateurs',
+                ], 403);
+    }
 
         $user->save();
 
@@ -122,8 +152,15 @@ class UserController extends Controller
             'message' => 'Utilisateur mis à jour avec succès',
             'user' => $user
         ], 200);
-    }
 
+    } catch (\Exception $e) {
+        \Log::error('Erreur lors de la mise à jour: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'Une erreur est survenue lors de la mise à jour',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
     /**
      * Supprimer un utilisateur.
      * Accessible uniquement par un administrateur.
@@ -137,6 +174,7 @@ class UserController extends Controller
         }
 
         // Assurez-vous que seul un administrateur peut supprimer un utilisateur
+        
         if (!Auth::user()->is_admin) {
             return response()->json(['message' => 'Accès interdit'], 403);
         }
@@ -145,5 +183,82 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Utilisateur supprimé avec succès'], 200);
     }
+
+    /**
+     * Déconnexion de l'utilisateur.
+     * Révoque le token d'authentification.
+     */
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+        if ($user) {
+            $user->tokens()->delete(); // Révoque tous les tokens de l'utilisateur
+                    return response()->json(['message' => 'Déconnexion réussie'], 200);     
+        } else {
+                    return response()->json(['message' => 'Utilisateur non authentifié'], 401);
+
+        }
+    }
+    /**
+     * Rechercher des utilisateurs par nom ou email.
+     * Accessible uniquement par l'administrateur.
+     */
+    public function search(Request $request)    
+    {
+        $query = $request->input('query');
+
+        if (!$query) {
+            return response()->json(['message' => 'Aucune requête de recherche fournie'], 400);
+        }
+
+        // Rechercher par nom ou email
+        $users = User::where('name', 'like', "%{$query}%")
+            ->orWhere('email', 'like', "%{$query}%")
+            ->get();
+
+        return response()->json($users, 200);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        // Logique pour envoyer un email de réinitialisation de mot de passe
+        // ...
+
+        return response()->json(['message' => 'Email de réinitialisation envoyé'], 200);
+    }
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email|exists:users,email',             
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+        // Logique pour réinitialiser le mot de passe
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+
+        }
+        $user->password = Hash::make($request->password);
+        $user->save();
+        return response()->json(['message' => 'Mot de passe réinitialisé avec succès'], 200);
+    }
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'verification_code' => 'required|string',
+        ]);
+
+        // Logique pour vérifier le code de vérification
+        // ...
+
+        return response()->json(['message' => 'Email vérifié avec succès'], 200);
+    }
 }
+
 

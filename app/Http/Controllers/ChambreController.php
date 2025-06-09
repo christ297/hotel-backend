@@ -43,7 +43,6 @@ class ChambreController extends Controller
             'type' => 'required|in:Simple,Double,Suite',
             'prix_nuite' => 'required|numeric|min:0',
             'disponibilite' => 'required|boolean',
-            'date' => 'required|date',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         if ($request->hasFile('photo')) {
@@ -86,7 +85,8 @@ class ChambreController extends Controller
             'type' => 'in:Simple,Double,Suite',
             'prix_nuite' => 'numeric|min:0',
             'disponibilite' => 'boolean',
-            'date' => 'date',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+
         ]);
 
         $chambre->update($validatedData);

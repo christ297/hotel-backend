@@ -13,6 +13,11 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BarStatsController;
     
     Route::post('/users', [UserController::class, 'store']);
+    Route::post('/users/forgot-password', [UserController::class, 'forgotPassword']);
+    Route::post('/users/reset-password', [UserController::class, 'resetPassword']);
+    Route::post('/users/verify-email', [UserController::class, 'verifyEmail']);
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users/logout', [UserController::class, 'logout']);
     Route::post('/users/login', [UserController::class, 'login']);
 
 
@@ -23,8 +28,8 @@ use App\Http\Controllers\BarStatsController;
         Route::post('/chambre', [ChambreController::class, 'store']);
         Route::put('/chambre/{id}', [ChambreController::class, 'update']);
         Route::delete('/chambre/{id}', [ChambreController::class, 'destroy']);
+        Route::get('/chambres', [ChambreController::class, 'index']);
 
-        Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
