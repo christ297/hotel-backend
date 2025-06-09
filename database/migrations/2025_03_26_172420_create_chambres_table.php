@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('type', ['Simple', 'Double', 'Suite']);
             $table->double('prix_nuite');
             $table->boolean('disponibilite')->default(true);
+            $table->text('description')->nullable();
             $table->string('photo')->nullable();
             $table->timestamps();
         });

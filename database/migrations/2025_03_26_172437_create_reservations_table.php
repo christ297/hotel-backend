@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('chambre_id')->constrained('chambres');
-            $table->integer('numero_reservation')->unique();
-            $table->date('date_reservation');
+            $table->string('numero_reservation')->unique();
             $table->date('date_arrive');
             $table->date('date_depart');
             $table->integer('dure_reservation');

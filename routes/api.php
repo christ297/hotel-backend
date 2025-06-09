@@ -21,21 +21,21 @@ use App\Http\Controllers\BarStatsController;
     Route::post('/users/login', [UserController::class, 'login']);
 
 
-    Route::get('/chambre', [ChambreController::class, 'index']);
+    Route::get('/chambres', [ChambreController::class, 'index']);
     Route::get('/chambre/{id}', [ChambreController::class, 'show']);
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/chambre', [ChambreController::class, 'store']);
         Route::put('/chambre/{id}', [ChambreController::class, 'update']);
         Route::delete('/chambre/{id}', [ChambreController::class, 'destroy']);
-        Route::get('/chambres', [ChambreController::class, 'index']);
 
         Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
         Route::post('/reservation', [ReservationController::class, 'store']);
-        Route::get('/reservation', [ReservationController::class, 'index']);
+        Route::get('/reservations', [ReservationController::class, 'index']);
+        Route::get('/reservations/user/{userId}', [ReservationController::class, 'userReservations']);
         Route::get('/reservation/{id}', [ReservationController::class, 'show']);
         Route::put('/reservation/{id}', [ReservationController::class, 'update']);
         Route::delete('/reservation/{id}', [ReservationController::class, 'destroy']);
