@@ -9,7 +9,8 @@ class Order extends Model
 {
     protected $fillable = ['room_number', 'status', 'total'];
 
-    public function items(): HasMany
+
+     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }

@@ -12,4 +12,10 @@ class MenuItem extends Model
         'available' => 'boolean',
         'price' => 'float'
     ];
+
+
+     public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }
